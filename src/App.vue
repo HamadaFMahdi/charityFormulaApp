@@ -86,7 +86,7 @@
                         />
                       </v-sheet>
                     </v-col>
-                    <v-col style="text-align: center;" cols="12">
+                    <v-col align="center" cols="12">
                       <v-btn
                         x-large
                         :disabled="!valid"
@@ -104,7 +104,7 @@
           </v-col>
         </v-row>
         <v-row class="mt-6 mx-5">
-          <v-col cols="12" >
+          <v-col align="center" cols="12" >
             <v-card outlined class="pa-12">
               <v-container>
                 <v-data-table
@@ -113,6 +113,14 @@
                   caption="Saved Projects"
                 ></v-data-table>
               </v-container>
+              <v-btn
+                small
+                color="red"
+                @click="clear"
+                outlined
+              >
+                Clear all
+              </v-btn>
             </v-card>
           </v-col>
         </v-row>
@@ -237,6 +245,10 @@ export default {
     },
   },
   methods: {
+    clear() {
+      localStorage.setItem("projects", "[]")
+      this.fetchProjects()
+    },
     formatToPrice(value) {
       return `${value.toFixed(1)}`;
     },
@@ -250,6 +262,10 @@ export default {
       }
     },
     save() {
+      this.loading = true
+      setTimeout(() => {
+        this.loading = false
+      }, 1000)
       // save to memory
       let currentProjects = JSON.parse(localStorage.getItem("projects"))
       // check name doesn't already exist
