@@ -103,15 +103,26 @@
             </v-card>
           </v-col>
         </v-row>
-        <v-row class="mt-6">
-          <v-col cols="12" md="8" offset-md="2">
+        <v-row class="mt-6 mx-5">
+          <v-col cols="12" >
             <v-card outlined class="pa-12">
               <v-container>
-
+                <v-data-table
+                  :headers="headers"
+                  :items="projects"
+                  caption="Saved Projects"
+                ></v-data-table>
               </v-container>
             </v-card>
           </v-col>
         </v-row>
+        <v-snackbar
+          v-model="snackbarShow"
+          top right 
+          color="error"
+        >
+          {{snackbarText}}
+        </v-snackbar>
       </v-main>
     </v-app>
 </template>
@@ -127,6 +138,20 @@ export default {
     AnimatedNumber
   },
   data: () => ({
+    headers: [
+      {
+        text: 'Name',
+        align: 'start',
+        sortable: false,
+        value: 'name',
+      },
+      { text: 'Charity Type', value: 'type' },
+      { text: 'Longevity', value: 'longevity' },
+      { text: 'Beneficiaries', value: 'people' },
+      { text: 'Cost', value: 'cost' },
+      { text: 'Created', value: 'created' },
+      { text: 'Score', value: 'score' },
+    ],
     valid: true,
     loading: false,
     rules: [
@@ -174,7 +199,13 @@ export default {
       {option: '< £1000', score: 5, weight: 0.1},
     ],
     finalScore: null,
+    projects: [],
+    snackbarShow: false,
+    snackbarText: ''
   }),
+  mounted() {
+    this.fetchProjects()
+  },
   computed: {
     calc() {
       if(this.valid) {
@@ -215,11 +246,34 @@ export default {
       } else if(score >= 2) {
         return "orange" 
       } else if(score >= 0) {
-        return "red" 
+        return "error" 
       }
     },
     save() {
       // save to memory
+      let currentProjects = JSON.parse(localStorage.getItem("projects"))
+      // check name doesn't already exist
+      let check = currentProjects.find(x => x.name === this.name)
+      console.log(check)
+      if(!check) {
+        currentProjects.push({
+          ...this.calc,
+          created: new Date().toLocaleString(),
+          name: this.name
+        })
+        localStorage.setItem("projects",JSON.stringify(currentProjects))
+        this.fetchProjects()
+      } else {
+        this.snackbarText = 'Project exists'
+        this.snackbarShow = true
+      }
+    },
+    fetchProjects() {
+      if(!localStorage.getItem("projects")){
+        localStorage.setItem("projects", "[]")
+      } else {
+        this.projects = JSON.parse(localStorage.projects)
+      }
     }
   },
 };
